@@ -5,9 +5,11 @@ services:
     restart: no
     ports:
       - "${NGROK_UI_PORT}:4040"
-    command: http host.docker.internal:${NGROK_LOCAL_HTTP_REGISTER_PORT}
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+    command: [
+      "http", "host.docker.internal:${NGROK_LOCAL_HTTP_REGISTER_PORT}"
+    ]
     networks:
       - my_docker_network
 
@@ -15,8 +17,6 @@ services:
     image: traefik:latest
     container_name: digital_service_ecosystem-traefik
     restart: no
-    security_opt:
-      - no-new-privileges:true
     ports:
       - 80:80
       - ${TRAEFIK_UI_PORT}:9090
@@ -27,6 +27,8 @@ services:
       - ./digital_service_ecosystem/traefik/traefik-data/traefik.yml:/traefik.yml:ro
       - ./digital_service_ecosystem/traefik/traefik-data/configurations:/configurations
       - ./digital_service_ecosystem/traefik/traefik-data/acme.json:/acme.json
+    security_opt:
+      - no-new-privileges:true
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=my_docker_network"
@@ -43,12 +45,10 @@ services:
     container_name: digital_service_ecosystem-notification_service
     restart: no
     # ports:
-    #   - "${BE_NOTIFICATION_SERVICE_PORT}:8000"
+    #   - "${NOTIFICATION_SERVICE_PORT}:8000"
     volumes:
       - ./digital_service_ecosystem/notification_service/config:/app/config
       - ./digital_service_ecosystem/notification_service/tmp:/app/tmp
-    networks:
-      - my_docker_network
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=my_docker_network"
@@ -56,6 +56,8 @@ services:
       - "traefik.http.routers.notification-service.entrypoints=web"
       - "traefik.http.routers.notification-service.middlewares=cors@file"
       - "traefik.http.services.notification-service.loadbalancer.server.port=8000"
+    networks:
+      - my_docker_network
 
   # digital_service_ecosystem-xxx_service:
   #   image: thanhldt060802/personal-project-digital_service_ecosystem-xxx_service:main-latest
@@ -66,8 +68,6 @@ services:
   #   volumes:
   #     - ./digital_service_ecosystem/xxx_service/config:/app/config
   #     - ./digital_service_ecosystem/xxx_service/tmp:/app/tmp
-  #   networks:
-  #     - my_docker_network
   #   labels:
   #     - "traefik.enable=true"
   #     - "traefik.docker.network=my_docker_network"
@@ -75,6 +75,8 @@ services:
   #     - "traefik.http.routers.xxx-service.entrypoints=web"
   #     - "traefik.http.routers.xxx-service.middlewares=cors@file"
   #     - "traefik.http.services.xxx-service.loadbalancer.server.port=8000"
+  #   networks:
+  #     - my_docker_network
 
 networks:
   my_docker_network:
